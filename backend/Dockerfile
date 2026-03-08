@@ -40,8 +40,7 @@ RUN mkdir -p /app/storage/app/public /app/storage/framework/cache /app/storage/f
 EXPOSE 8000
 
 # ៨. ពាក្យបញ្ជាដំណើរការ (CMD)
-# ការកែសម្រួលសំខាន់ៗ៖
-# - ប្រើ php artisan config:clear ដើម្បីឱ្យវាចាប់យក DATABASE_URL ថ្មីជានិច្ច
-# - ប្រើ php artisan migrate:fresh --force ដើម្បីលុប Table ចាស់ដែលស្ទះចោល រួចបង្កើតថ្មី
-# - បន្ថែម || true ទៅលើ storage:link ដើម្បីកុំឱ្យវាបោះ Error នាំឱ្យគាំងដល់ការ Migrate
-CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan config:clear && php artisan cache:clear && php artisan migrate:fresh --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=8000"]
+# ការកែសម្រួលដើម្បីដោះស្រាយបញ្ហា "relation cache does not exist":
+# - ប្រើ "migrate --force" មុនគេបង្អស់ដើម្បីបង្កើត Table ទាំងអស់ (រួមទាំង cache table)
+# - បន្ថែម "|| true" ពេល clear cache ដើម្បីការពារកុំឱ្យវាបោះ Error នាំឱ្យគាំង App
+CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan migrate --force && php artisan config:clear || true && php artisan cache:clear || true && php artisan optimize && php artisan serve --host=0.0.0.0 --port=8000"]
