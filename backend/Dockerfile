@@ -32,7 +32,6 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs \
     && cd /app
 
 # ៦. កំណត់សិទ្ធិ (Permissions)
-# បង្កើត directory ឱ្យបានត្រឹមត្រូវ និងកំណត់ owner ទៅឱ្យ www-data
 RUN mkdir -p /app/storage/app/public /app/storage/framework/cache /app/storage/framework/sessions /app/storage/framework/views /app/storage/logs \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
     && chmod -R 775 /app/storage /app/bootstrap/cache
@@ -40,7 +39,9 @@ RUN mkdir -p /app/storage/app/public /app/storage/framework/cache /app/storage/f
 # ៧. បើក Port
 EXPOSE 8000
 
-# ៨. ពាក្យបញ្ជាដំណើរការ (CMD) - កែសម្រួលត្រង់នេះ
-# - ប្រើ --force លើ storage:link ដើម្បីកុំឱ្យវាបោះ error បើមាន link រួចហើយ
-# - បន្ថែម "|| true" ដើម្បីឱ្យវាបន្តទៅមុខទៀត បើទោះជាមានបញ្ហាតូចតាច
-CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+# ៨. ពាក្យបញ្ជាដំណើរការ (CMD)
+# ការកែសម្រួលសំខាន់ៗ៖
+# - ប្រើ php artisan config:clear ដើម្បីឱ្យវាចាប់យក DATABASE_URL ថ្មីជានិច្ច
+# - ប្រើ php artisan migrate:fresh --force ដើម្បីលុប Table ចាស់ដែលស្ទះចោល រួចបង្កើតថ្មី
+# - បន្ថែម || true ទៅលើ storage:link ដើម្បីកុំឱ្យវាបោះ Error នាំឱ្យគាំងដល់ការ Migrate
+CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan config:clear && php artisan cache:clear && php artisan migrate:fresh --force && php artisan optimize && php artisan serve --host=0.0.0.0 --port=8000"]
