@@ -1,6 +1,7 @@
+# ប្រើ PHP 8.2 FPM ជា Base Image
 FROM php:8.2-fpm
 
-# ១. ដំឡើង System Dependencies
+# ១. ដំឡើង System Dependencies សម្រាប់ PostgreSQL និង Image Processing
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libpng-dev \
@@ -14,33 +15,29 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_pgsql gd \
     && rm -rf /var/lib/apt/lists/*
 
-# ២. ដំឡើង Node.js និង NPM
+# ២. ដំឡើង Node.js (សម្រាប់ node-khqr)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
 # ៣. ដំឡើង Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# ៤. កំណត់ទីតាំងការងារ (WORKDIR)
+# ៤. កំណត់តំបន់ការងារ
 WORKDIR /app
 COPY . .
 
-# ៥. ដំឡើង PHP dependencies និង KHQR Node deps
+# ៥. ដំឡើង PHP dependencies និង Node dependencies សម្រាប់ KHQR
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs \
-    && cd /app/node-khqr \
-    && npm install --omit=dev \
-    && cd /app
+    && cd /app/node-khqr && npm install --omit=dev && cd /app
 
-# ៦. កំណត់សិទ្ធិ (Permissions)
+# ៦. រៀបចំ Folders និងកំណត់សិទ្ធិ (Permissions)
 RUN mkdir -p /app/storage/app/public /app/storage/framework/cache /app/storage/framework/sessions /app/storage/framework/views /app/storage/logs \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
     && chmod -R 775 /app/storage /app/bootstrap/cache
 
-# ៧. បើក Port
+# ៧. បើក Port 8000
 EXPOSE 8000
 
 # ៨. ពាក្យបញ្ជាដំណើរការ (CMD)
-# ការកែសម្រួលដើម្បីដោះស្រាយបញ្ហា "relation cache does not exist":
-# - ប្រើ "migrate --force" មុនគេបង្អស់ដើម្បីបង្កើត Table ទាំងអស់ (រួមទាំង cache table)
-# - បន្ថែម "|| true" ពេល clear cache ដើម្បីការពារកុំឱ្យវាបោះ Error នាំឱ្យគាំង App
-CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan migrate --force && php artisan config:clear || true && php artisan cache:clear || true && php artisan optimize && php artisan serve --host=0.0.0.0 --port=8000"]
+# បញ្ជាក់៖ ប្រើ migrate --force ដើម្បីបង្កើត Table និង clear cache ដើម្បីសម្អាតកូដចាស់
+CMD ["sh", "-c", "php artisan storage:link --force || true && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=8000"]
