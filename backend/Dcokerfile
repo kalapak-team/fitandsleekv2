@@ -38,9 +38,4 @@ RUN mkdir -p /app/storage/app/public /app/storage/framework/cache /app/storage/f
 # ៨. បើក Port 8000 សម្រាប់ Railway ចូលមកកាន់ App
 EXPOSE 8000
 
-# ៩. CMD: រាល់ពេល Redeploy វានឹងដំណើរការ Command ទាំងនេះតាមលំដាប់
-# សំខាន់៖ ប្រើតែ `migrate --force` ប៉ុណ្ណោះ (គ្មាន db:wipe ទេ) ដើម្បីរក្សាទិន្នន័យចាស់ក្នុង Neon
-# កូដបែបសាមញ្ញបំផុត (តែត្រូវប្រាកដថាបងបាន Link Storage រួចហើយ)
-CMD php artisan config:cache; \
-    php artisan route:cache; \
-    php artisan serve --host=0.0.0.0 --port=8000
+
