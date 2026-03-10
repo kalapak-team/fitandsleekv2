@@ -1,4 +1,3 @@
-
 FROM php:8.2-fpm
 
 # ១. ដំឡើង System Dependencies សម្រាប់ PostgreSQL និង PHP Extensions
