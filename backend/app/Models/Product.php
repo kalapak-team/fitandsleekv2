@@ -94,6 +94,28 @@ class Product extends Model
         return $this->belongsToMany(Wishlist::class, 'wishlist_items');
     }
 
+    /**
+     * Normalize product image URLs to HTTPS and make relative paths absolute.
+     */
+    public function getImageUrlAttribute($value): ?string
+    {
+        if (!$value) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'http://')) {
+            return preg_replace('/^http:\/\//', 'https://', $value);
+        }
+
+        $absolute = asset(ltrim($value, '/'));
+
+        return preg_replace('/^http:\/\//', 'https://', $absolute);
+    }
+
     public function activeSale()
     {
         return $this->hasOne(Sale::class)
